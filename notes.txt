@@ -1,0 +1,40 @@
+# Doanload ODF of ObsID 0121920101 from HEASARC
+# wget -q -nH --cut-dirs=4 -r -l0 -c -N -np -R 'index*' -erobots=off --retr-symlinks http://heasarc.gsfc.nasa.gov/FTP/xmm/data/rev0//0402430401/ODF/
+
+
+# Because all the scripts are in bash
+bash
+
+# to be run in the dir with the numbers e.g. 0406030101
+# so that ODF is just the level above that.
+export HEADAS=/soft/lheasoft/headas/x86_64-pc-linux
+export LD_LIBRARY_PATH=/opt/SUNWspro/lib
+. $HEADAS/headas-init.sh
+
+
+. /soft/XMM/xmmsas/setsas.sh
+export SAS_CCFPATH=/proj/xmm/ccf
+
+gunzip */*.gz
+
+#XSA format - if no tar file present, this step does no damage
+# XSA names that odf, HEASARC ODF -> make common name
+mv odf ODF
+cd ODF
+tar -xvf *.tar 
+tar -xvf *.TAR  #XSA format
+rm *.tar
+rm *.TAR
+cd ..
+
+source /data/hguenther/obs/XMM/sas_vars.sh
+source /data/hguenther/obs/XMM/EPIC_check.sh
+
+cp /data/hguenther/obs/XMM/regions.sh .
+
+#Edit regions.sh
+
+source regions.sh
+
+source /data/hguenther/obs/XMM/EPIC_ana.sh
+source /data/hguenther/obs/XMM/RGS_ana.sh
