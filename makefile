@@ -2,6 +2,11 @@
 # To process multiple sources for one or more observation
 # call with different SRCFILE= parameters.
 
+# If the source parameters are defined in here, the targets should depend
+# on this makefile itself. However, during testing and debugging that 
+# would cause a lot of needless remaking. So, for now, I just removed that.
+# It can be put in, if desired, once this general makefile is ready.
+
 ### Source parameters ###
 # The parameters for source extraction can be defined (in order of precedence)
 # * as command line parameters
@@ -40,11 +45,6 @@ SHELL = /bin/sh
 
 no_target :
 	@echo No default target set!
-
-#ifneq ($(MASTERMAKE),)
-# makefile : $(MASTERMAKE)
-# 	cp $(MASTERMAKE) .
-#endif
 
 ccf.cif : $(ODFDIR)/*.FIT
 	cifbuild
@@ -92,12 +92,12 @@ EPIC_images : $(patsubst %_ImagingEvts.ds,%_im.fits,$(wildcard *_ImagingEvts.ds)
 # Get Source events + Pile up check (set sigma if desired !)
 # Could I simplify this with especget instead of separate evselect, rmfgen, arfgen?
 
-$(SRC)_%_filts.fits : %_filt.fits makefile $(SRCFILE)
+$(SRC)_%_filts.fits : %_filt.fits $(SRCFILE)
 	$(eval src = $(if $(findstring EMOS, $*),$(MOS_SRC),$(PN_SRC)))
 	evselect table=$< withfilteredset=true destruct=yes keepfilteroutput=true expression="(X,Y) IN $(src)" filteredset=$@
 	epatplot sigma=3 set=$<
 
-$(SRC)_%_filtsbg.fits : %_filt.fits makefile $(SRCFILE)
+$(SRC)_%_filtsbg.fits : %_filt.fits $(SRCFILE)
 	$(eval bg = $(if $(findstring EMOS, $*),$(MOS_BG),$(PN_BG)))
 	evselect table=$< withfilteredset=true destruct=yes keepfilteroutput=true expression="(X,Y) IN $(bg)" filteredset=$@
 
@@ -125,26 +125,26 @@ $(SRC)_%_spec.arf : $(SRC)_%_spec.fits $(SRC)_%_spec.rmf
 	-rm $@
 	grppha $< $@ comm="chkey respfile $*_spec.rmf & chkey backfile $*_specbg.fits & chkey ancrfile $*_spec.arf & group min 15 & exit"
 
-EPIC_spectra : $(patsubst %_im.fits,$(SRC)_%_spec.15grp,$(filter-out $(NO_SPEC) ,$(wildcard *_im.fits))) makefile $(SRCFILE)
+EPIC_spectra : $(patsubst %_im.fits,$(SRC)_%_spec.15grp,$(filter-out $(NO_SPEC) ,$(wildcard *_im.fits))) $(SRCFILE)
 
 # It would be an elegant solution to define a prototype for lc generation
 # and variables for each lc, but unfortunately the $(eval ) function is 
 # buggy in make version <= 3.80 and does not allow to define new recepies.
 # So, for now, number of lcs extracted is harcoded ('soft' and 'hard')
 
-lc = evselect table=$< withrateset=yes rateset=$@ makeratecolumn=yes maketimecolumn=yes timecolumn=TIME timebinsize=$(LC_BIN) expression=
+lc = evselect table=$< withrateset=yes rateset=$@ makeratecolumn=yes maketimecolumn=yes timecolumn=TIME timebinsize=$(LC_BIN)
 
-%_soft_lc.fits : %_filts.fits
+%_soft_lc.fits : %_filts.fits defaults.mk
 	$(lc) expression="$(SOFT_LC)"
 
-%_hard_lc.fits : %_filts.fits
-	$(lc) expression="$(SOFT_LC)"
-
-%_soft_bglc.fits : %_filtsbg.fits
+%_hard_lc.fits : %_filts.fits defaults.mk
 	$(lc) expression="$(HARD_LC)"
 
-%_hard_bglc.fits : %_filtsbg.fits
-	$(lc)  expression="$(HARD_LC)" expression=
+%_soft_bglc.fits : %_filtsbg.fits defaults.mk
+	$(lc) expression="$(SOFT_LC)"
+
+%_hard_bglc.fits : %_filtsbg.fits defaults.mk
+	$(lc) expression="$(HARD_LC)"
 
 
 soft_lcs = $(patsubst %_im.fits,$(SRC)_%_soft_lc.fits,$(filter-out $(NO_LC) ,$(wildcard *_im.fits)))
