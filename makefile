@@ -34,7 +34,7 @@ NO_LC =
 
 SHELL = /bin/sh
 
-.PHONY: EPIC_image EPIC_spectra EPIC_lc EPIC_all EPIC_prepare no_target clean_EPIC_lc clean_EPIC_spectra clean_EPIC_SRC clean_EPIC clean clean_all
+.PHONY: EPIC_image EPIC_spectra EPIC_lc EPIC_all EPIC_prepare no_target clean_EPIC_lc clean_EPIC_spectra clean_EPIC_SRC clean_EPIC clean clean_all clean_EPIC_images
 # keep all intermediate files - they are .rmf .arf
 .SECONDARY :
 
@@ -85,8 +85,7 @@ EPIC_prepare :
 
 %_im.fits : %_filt.fits
 	evselect table=$< withimageset=true imageset=$@ xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=50 yimagebinsize=50
-        -echo Run the following command to view images:
-	-echo ds9 -log -cmap heat $*_im.fits &
+	$(DS9) $*_im.fits &
 
 EPIC_images : $(patsubst %_ImagingEvts.ds,%_im.fits,$(wildcard *_ImagingEvts.ds))
 
@@ -102,18 +101,19 @@ $(SRC)_%_filtsbg.fits : %_filt.fits makefile $(SRCFILE)
 	$(eval bg = $(if $(findstring EMOS, $*),$(MOS_BG),$(PN_BG)))
 	evselect table=$< withfilteredset=true destruct=yes keepfilteroutput=true expression="(X,Y) IN $(bg)" filteredset=$@
 
-define spec_extract = 
-$(eval specchan = $(if $(findstring EMOS, $*),$(MOS_specchannelmax),$(PN_specchannelmax)))
-$(eval specbin = $(if $(findstring EMOS, $*),$(MOS_spectralbinsize),$(PN_spectralbinsize)))
-evselect table=$< withspectrumset=yes spectrumset=$@ energycolumn=PI withspecranges=yes specchannelmin=0 specchannelmax=$(specchan) spectralbinsize=$(specbin)
-backscale spectrumset=$@ badpixlocation=$<
-endef
-
+# The following two rules have identical recipies, but I did not get the
+# eval working in a define-endef block, so I just left that as it is. 
 %_spec.fits : %_filts.fits
-	$(spec_extract)
+	$(eval specchan = $(if $(findstring EMOS, $*),$(MOS_specchannelmax),$(PN_specchannelmax)))
+	$(eval specbin = $(if $(findstring EMOS, $*),$(MOS_spectralbinsize),$(PN_spectralbinsize)))
+	evselect table=$< withspectrumset=yes spectrumset=$@ energycolumn=PI withspecranges=yes specchannelmin=0 specchannelmax=$(specchan) spectralbinsize=$(specbin)
+	backscale spectrumset=$@ badpixlocation=$<
 
 %_specbg.fits : %_filtsbg.fits
-	$(spec_extract)
+	$(eval specchan = $(if $(findstring EMOS, $*),$(MOS_specchannelmax),$(PN_specchannelmax)))
+	$(eval specbin = $(if $(findstring EMOS, $*),$(MOS_spectralbinsize),$(PN_spectralbinsize)))
+	evselect table=$< withspectrumset=yes spectrumset=$@ energycolumn=PI withspecranges=yes specchannelmin=0 specchannelmax=$(specchan) spectralbinsize=$(specbin)
+	backscale spectrumset=$@ badpixlocation=$<
 
 %_spec.rmf : %_spec.fits
 	rmfgen spectrumset=$< rmfset=$@
@@ -167,18 +167,21 @@ clean_EPIC_lc :
 clean_EPIC_spectra :
 	-rm $(SRC)*spec*
 	-rm $(SRC)*filts*.fits
+	-rm *_E*_filt_pat.ps
 
 clean_EPIC_SRC : clean_EPIC_lc clean_EPIC_spectra
 
-clean_EPIC : 
+clean_EPIC_images :
+	-rm *_E*_filt.fits
+	-rm *_E*_gti.fits
+	-rm *_E*_he_lc.fits
+	-rm *_E*_im.fits
+        
+clean_EPIC : clean_EPIC_images
 	$(MAKE) clean_EPIC_SRC SRC=
 	-rm *_E*Badpixels.ds
-	-rm *_E*_filt.fits
-	-rm *_E*_filt_pat.ps
-	-rm *_E*_gti.fits
-	-rm *_E*_he_lc.fits 
 	-rm *_E*_ImagingEvts.ds 
-	-rm *_E*_im.fits
+
 
 clean : clean_EPIC
 
