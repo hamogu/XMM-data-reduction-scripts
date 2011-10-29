@@ -23,9 +23,9 @@ $(SUBDIRS):
 	# Auto update makefile in subdir from master make
 	$(MAKE) -C $@ makefile -f $(ORIGIN)/master.mk
 	$(MAKE) -C $@ defaults.mk -f $(ORIGIN)/master.mk
-	#$(MAKE) -C $@ EPIC_prepare
-	#$(MAKE) -C $@ EPIC_images
-	#$(MAKE) -C $@ clean_EPIC_lc
+	$(MAKE) -C $@ EPIC_prepare
+	$(MAKE) -C $@ EPIC_images
+	#$(MAKE) -C $@ clean_EPIC
 	cp /data/hguenther/John/my_processing/makefiles/$@.src $@/
 	$(MAKE) -C $@ SRCFILE=$@.src EPIC
 

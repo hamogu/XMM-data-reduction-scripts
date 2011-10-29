@@ -4,6 +4,9 @@
 # * in $(SRCFILE) (this is an example for such a file)
 # * in the makefile itself
 
+# specify a GTI file (in addition to the filtering for proton flares)
+# This can the used, e.g. to extract spectra of a stellar flare
+GTIFILE=
 
 # Source name for filenames
 SRC = Capella

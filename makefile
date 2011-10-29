@@ -5,7 +5,8 @@
 # If the source parameters are defined in here, the targets should depend
 # on this makefile itself. However, during testing and debugging that 
 # would cause a lot of needless remaking. So, for now, I just removed that.
-# It can be put in, if desired, once this general makefile is ready.
+# It can be put in, if desired, once this general makefile is ready, maybe
+# with if ..endif?.
 
 ### Source parameters ###
 # The parameters for source extraction can be defined (in order of precedence)
@@ -77,6 +78,7 @@ EPIC_prepare :
 %_gti.fits : %_he_lc.fits
 	$(eval expr = $(if $(findstring EMOS, $*),$(MOS_gti),$(PN_gti)))
 	tabgtigen table=$< expression=$(expr) gtiset=$@
+
 	
 %_filt.fits : %_ImagingEvts.ds %_gti.fits
 	$(eval expr = $(if $(findstring EMOS, $*),$(MOS_filt),$(PN_filt)))
@@ -91,15 +93,20 @@ EPIC_images : $(patsubst %_ImagingEvts.ds,%_im.fits,$(wildcard *_ImagingEvts.ds)
 
 # Get Source events + Pile up check (set sigma if desired !)
 # Could I simplify this with especget instead of separate evselect, rmfgen, arfgen?
+ifeq ($(strip $(GTIFILE)),)
+select = evselect table=$< withfilteredset=true destruct=yes keepfilteroutput=true expression="(X,Y) IN $(reg)" filteredset=$@
+else
+select = evselect table=$< withfilteredset=true destruct=yes keepfilteroutput=true expression="gti($(GTIFILE),TIME) && ((X,Y) IN $(reg))" filteredset=$@
+endif
 
-$(SRC)_%_filts.fits : %_filt.fits $(SRCFILE)
-	$(eval src = $(if $(findstring EMOS, $*),$(MOS_SRC),$(PN_SRC)))
-	evselect table=$< withfilteredset=true destruct=yes keepfilteroutput=true expression="(X,Y) IN $(src)" filteredset=$@
-	epatplot sigma=3 set=$<
+$(SRC)_%_filts.fits : %_filt.fits $(SRCFILE) $(GTIFILE)
+	$(eval reg = $(if $(findstring EMOS, $*),$(MOS_SRC),$(PN_SRC)))
+	$(select)
+	epatplot sigma=3 set=$@
 
-$(SRC)_%_filtsbg.fits : %_filt.fits $(SRCFILE)
-	$(eval bg = $(if $(findstring EMOS, $*),$(MOS_BG),$(PN_BG)))
-	evselect table=$< withfilteredset=true destruct=yes keepfilteroutput=true expression="(X,Y) IN $(bg)" filteredset=$@
+$(SRC)_%_filtsbg.fits : %_filt.fits $(SRCFILE) $(GTIFILE)
+	$(eval reg = $(if $(findstring EMOS, $*),$(MOS_BG),$(PN_BG)))
+	$(select)
 
 # The following two rules have identical recipies, but I did not get the
 # eval working in a define-endef block, so I just left that as it is. 
