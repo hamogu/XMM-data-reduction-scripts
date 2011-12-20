@@ -69,18 +69,18 @@ EPIC_prepare :
 
 # use eval here, because variables normally cannot be defined within recepies. That should be taken care of by the definition of targets, but unfortunately, this would require %EMOS% and only one % is allowed.
 
-%_he_lc.fits : %_ImagingEvts.ds
+%_he_lc.fits : %_ImagingEvts.ds defaults.mk
 	echo $(MOS_he)
 	$(eval expr = $(if $(findstring EMOS, $*),$(MOS_he),$(PN_he)))
 	evselect table=$< withrateset=true rateset=$@ makeratecolumn=yes timecolumn=TIME timebinsize=100 maketimecolumn=yes expression=$(expr)
 
 # Filter eventfile for spectral analysis (good events; GTI; 0.15-15.0 keV; single+double only)
-%_gti.fits : %_he_lc.fits
+%_gti.fits : %_he_lc.fits defaults.mk
 	$(eval expr = $(if $(findstring EMOS, $*),$(MOS_gti),$(PN_gti)))
 	tabgtigen table=$< expression=$(expr) gtiset=$@
 
 	
-%_filt.fits : %_ImagingEvts.ds %_gti.fits
+%_filt.fits : %_ImagingEvts.ds %_gti.fits defaults.mk
 	$(eval expr = $(if $(findstring EMOS, $*),$(MOS_filt),$(PN_filt)))
 	evselect table=$< withfilteredset=true filteredset=$@ keepfilteroutput=true destruct=yes expression="(gti($*_gti.fits,TIME) && $(expr))"
 
@@ -99,24 +99,24 @@ else
 select = evselect table=$< withfilteredset=true destruct=yes keepfilteroutput=true expression="gti($(GTIFILE),TIME) && ((X,Y) IN $(reg))" filteredset=$@
 endif
 
-$(SRC)_%_filts.fits : %_filt.fits $(SRCFILE) $(GTIFILE)
+$(SRC)_%_filts.fits : %_filt.fits $(SRCFILE) $(GTIFILE) defaults.mk
 	$(eval reg = $(if $(findstring EMOS, $*),$(MOS_SRC),$(PN_SRC)))
 	$(select)
 	epatplot sigma=3 set=$@
 
-$(SRC)_%_filtsbg.fits : %_filt.fits $(SRCFILE) $(GTIFILE)
+$(SRC)_%_filtsbg.fits : %_filt.fits $(SRCFILE) $(GTIFILE) defaults.mk
 	$(eval reg = $(if $(findstring EMOS, $*),$(MOS_BG),$(PN_BG)))
 	$(select)
 
 # The following two rules have identical recipies, but I did not get the
 # eval working in a define-endef block, so I just left that as it is. 
-%_spec.fits : %_filts.fits
+%_spec.fits : %_filts.fits defaults.mk
 	$(eval specchan = $(if $(findstring EMOS, $*),$(MOS_specchannelmax),$(PN_specchannelmax)))
 	$(eval specbin = $(if $(findstring EMOS, $*),$(MOS_spectralbinsize),$(PN_spectralbinsize)))
 	evselect table=$< withspectrumset=yes spectrumset=$@ energycolumn=PI withspecranges=yes specchannelmin=0 specchannelmax=$(specchan) spectralbinsize=$(specbin)
 	backscale spectrumset=$@ badpixlocation=$<
 
-%_specbg.fits : %_filtsbg.fits
+%_specbg.fits : %_filtsbg.fits defaults.mk
 	$(eval specchan = $(if $(findstring EMOS, $*),$(MOS_specchannelmax),$(PN_specchannelmax)))
 	$(eval specbin = $(if $(findstring EMOS, $*),$(MOS_spectralbinsize),$(PN_spectralbinsize)))
 	evselect table=$< withspectrumset=yes spectrumset=$@ energycolumn=PI withspecranges=yes specchannelmin=0 specchannelmax=$(specchan) spectralbinsize=$(specbin)
