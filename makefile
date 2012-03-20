@@ -189,8 +189,17 @@ clean_EPIC : clean_EPIC_images
 	-rm *_E*Badpixels.ds
 	-rm *_E*_ImagingEvts.ds 
 
+# OM stuff
+OM_prepare : 
+	-mkdir $(OMDIR)
+	#process basic OM fast mode stuff with 10 sec binning and logfile
+	omfchain outdirectory=$(OMDIR) >& $(OMDIR)/omfchain.log
+	omichain outdirectory=$(OMDIR) >& $(OMDIR)/omichain.log
 
-clean : clean_EPIC
+clean_OM :
+	rm -r OM
+
+clean : clean_EPIC clean_OM
 
 clean_all : clean
 	-rm $(SAS_CCF)

@@ -36,6 +36,7 @@ PN_specchannelmax=20479
 ### directory structure  ###
 # directory which contains the ODF files. Typically this is ODF or odf
 ODFDIR := ODF
+OMDIR := OM
 
 
 ### SAS settings ###

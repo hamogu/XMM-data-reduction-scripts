@@ -31,8 +31,8 @@ $(SUBDIRS):
 # in this setup it only works if that is only one dir!
 #otherwise need some string procession to get the _noflare part removed from dir name
 noflare : $(FLARE)
-    cp $(SRCFILES)/$<_noflare.src $</
-    $(MAKE) -C $< SRCFILE=$<_noflare.src EPIC
+	cp $(SRCFILES)/$<_noflare.src $</
+	$(MAKE) -C $< SRCFILE=$<_noflare.src EPIC
 
 #SRC=$@.src
 # in /media/MAX/moritz/obs/XMM/
