@@ -16,7 +16,7 @@ PN_gti = "RATE<3.0"
 
 ### EPIC Lightcurve ###
 # bin size of source and bg lightcurves in s
-LC_BIN = 600
+LC_BIN = 5000
 # energy filter for soft and hard lightcurve
 SOFT_LC = PI in [200:1000]
 HARD_LC = PI in [1000:8000]

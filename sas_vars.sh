@@ -4,8 +4,8 @@
 #. $HEADAS/headas-init.sh
 #. /soft/XMM/xmmsas/setsas.sh
 
-export SAS_DIR=/opt/sas/xmmsas_20141104_1833
-export SAS_CCFPATH=/blackhole/d1/grinberg/xmm/ccf
+export SAS_DIR=/nfs/mkx/a1/linux-x86_64/opt/packages/xmmsas_20170112_1337
+export SAS_CCFPATH=/nfs/mkx/a1/../d1/ccf
 
 # ODF file location
 export SAS_ODF=$( pwd )/ODF
@@ -16,3 +16,4 @@ export SAS_VERBOSITY=3
 export SAS_SUPRESS_WARNING=3
 #export GRACE_HOME=/soft/grace
 
+/nfs/mkx/a1/setup/xmmsas-setup.sh

@@ -9,7 +9,7 @@
 GTIFILE=
 
 # Source name for filenames
-SRC = Capella
+SRC = deltaCep
 # MOS and PN expressions for source and bg extractions regions
 MOS_SRC = circle(15475, 13175, 600)
 MOS_BG = circle(13125,17125,2500)
@@ -17,7 +17,7 @@ PN_SRC = circle(15475, 13175, 600)
 PN_BG = circle(13125,17125,2500)
 
 #list all *im.fits files where no spectra shold be extracted (e.g. target outside FOV)
-NO_SPEC = 1796_0510780401_EMOS1_S004_im.fits 1796_0510780401_EMOS2_S006_im.fits 1796_0510780401_EMOS2_S006_im.fits 1796_0510780401_EPN_S001_im.fits
+NO_SPEC = 
 
 #list all *im.fits files where no lightcurves shold be extracted (e.g. target outside FOV)
 NO_LC = $(NO_SPEC)

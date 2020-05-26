@@ -49,7 +49,7 @@ no_target :
 
 ccf.cif : $(ODFDIR)/*.FIT
 	cifbuild
-	
+
 $(ODFDIR)/*.SAS : $(ODFDIR)/*.ASC ccf.cif $(ODFDIR)/*.FIT
 	odfingest outdir=$(SAS_ODF) odfdir=$(SAS_ODF)
 
@@ -79,11 +79,9 @@ EPIC_prepare :
 	$(eval expr = $(if $(findstring EMOS, $*),$(MOS_gti),$(PN_gti)))
 	tabgtigen table=$< expression=$(expr) gtiset=$@
 
-	
 %_filt.fits : %_ImagingEvts.ds %_gti.fits defaults.mk
 	$(eval expr = $(if $(findstring EMOS, $*),$(MOS_filt),$(PN_filt)))
 	evselect table=$< withfilteredset=true filteredset=$@ keepfilteroutput=true destruct=yes expression="(gti($*_gti.fits,TIME) && $(expr))"
-
 
 %_im.fits : %_filt.fits
 	evselect table=$< withimageset=true imageset=$@ xcolumn=X ycolumn=Y imagebinning=binSize ximagebinsize=50 yimagebinsize=50
@@ -174,7 +172,7 @@ clean_EPIC_lc :
 clean_EPIC_spectra :
 	-rm $(SRC)*spec*
 	-rm $(SRC)*filts*.fits
-	-rm *_E*_filt_pat.ps
+	-rm *_E*_filts_pat.ps
 
 clean_EPIC_SRC : clean_EPIC_lc clean_EPIC_spectra
 
@@ -197,7 +195,7 @@ OM_prepare :
 	omichain outdirectory=$(OMDIR) >& $(OMDIR)/omichain.log
 
 clean_OM :
-	rm -r OM
+	-rm -r OM
 
 clean : clean_EPIC clean_OM
 

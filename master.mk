@@ -1,9 +1,9 @@
-SUBDIRS = 0741680101  0741680201  0741680301
+SUBDIRS = 0152260101 0693390101
 
 
 
 ORIGIN = /nfs/melkor/d1/guenther/soft/XMM-data-reduction-scripts
-SRCFILES = /data/hguenther/John/my_processing/makefiles
+SRCFILES = /nfs/melkor/d1/guenther/projects/Cepheids/XMM
 FLARE = 
 
 .PHONY: subdirs $(SUBDIRS) noflare
@@ -20,8 +20,9 @@ $(SUBDIRS):
 	# Auto update makefile in subdir from master make
 	$(MAKE) -C $@ makefile -f $(ORIGIN)/master.mk
 	$(MAKE) -C $@ defaults.mk -f $(ORIGIN)/master.mk
-	cp $(SRCFILES)/$@.src $@/
-	$(MAKE) -C $@ SRCFILE=$@.src EPIC_images
+	$(MAKE) -C $@ SRCFILE=$@.src EPIC_prepare
+	#cp $(SRCFILES)/$@.src $@/
+	#$(MAKE) -C $@ SRCFILE=$@.src EPIC_lc
 	#$(MAKE) -C $@ clean_EPIC
 	#$(MAKE) -C $@ SRCFILE=$@.src EPIC
 
@@ -33,5 +34,5 @@ noflare : $(FLARE)
 	$(MAKE) -C $< SRCFILE=$<_noflare.src EPIC
 
 # in /media/MAX/moritz/obs/XMM/
-# make subdirs -f /data/hguenther/obs/XMM/scripts/master.mk -k -j 3
+# make subdirs -f /nfs/melkor/d1/guenther/soft/XMM-data-reduction-scripts/master.mk -k -j 3
 # -j 3: Do parallel, but max 3 processes at a time. I have dual core, if I use much more, than it's swapping all the time.
